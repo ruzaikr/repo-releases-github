@@ -1,0 +1,4 @@
+repository,min_version
+kubernetes/kubernetes,1.8.0
+prometheus/prometheus,2.2.0
+stripe/stripe-go,17.4.1
