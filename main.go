@@ -14,6 +14,7 @@ import (
 	"github.com/google/go-github/github"
 )
 
+// RELEASES_PER_PAGE is a constant to set the # of releases to GET per page. Higher means fewer API calls.
 const RELEASES_PER_PAGE = 100
 
 //--- custom sorting ---
@@ -104,10 +105,10 @@ type Input struct {
 }
 
 // readInputFromFile opens a file 'input' in the project root and returns a built []Input
-func readInputFromFile(path string) []Input {
+func readInputFromFile(path string) ([]Input, error) {
 	file, err := os.Open(path)
 	if err != nil {
-		log.Fatal("Failed to open text file named 'input' in project root. Details: " + err.Error())
+		return nil, err
 	}
 	defer file.Close()
 
@@ -132,10 +133,17 @@ func readInputFromFile(path string) []Input {
 	}
 
 	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	return repos
+	// Github rate limit is 60. We cannot predict the # of API calls because there may be multiple pages of releases
+	// for each repository. However, if the number of repositories exceeds 60, we can guarantee there will be more than
+	// 60 API calls and therefore we can prevent an error
+	if len(repos) > 60 {
+		return nil, fmt.Errorf("number of repositories cannot exceed 60")
+	}
+
+	return repos, nil
 }
 
 // getReleasesForRepoFromGithub returns a full list (all pages) of releases for a particular owner/repo
@@ -150,6 +158,7 @@ func getReleasesForRepoFromGithub(client *github.Client, repoInput *Input) ([]*g
 	for loop {
 		releasesPerPage, resp, err := client.Repositories.ListReleases(ctx, repoInput.Owner, repoInput.Repo, opt)
 		if err != nil {
+			//TODO: Add retry?
 			return releases, &resp.Rate, err
 		}
 
@@ -174,8 +183,16 @@ func validVersionString(versionString string) bool {
 // Please use the format defined by the fmt.Printf line at the bottom, as we will define a passing coding challenge as one that outputs
 // the correct information, including this line
 func main() {
+
+	if len(os.Args) < 2 {
+		log.Fatal("Ensure that file path argument is provided.")
+	}
+
 	path := os.Args[1]
-	repos := readInputFromFile(path)
+	repos, err := readInputFromFile(path)
+	if err != nil {
+		log.Fatalf("Error occurred when reading input from file. Details: %v", err)
+	}
 
 	client := github.NewClient(nil)
 
@@ -188,7 +205,7 @@ func main() {
 
 			log.Printf("Failed to retrieve all releases for %s/%s. Details: %v.", repoInput.Owner,
 				repoInput.Repo, err)
-			// TODO: Is it better to stop here?
+			// TODO: Is it better to stop here? Or move on to the next repo?
 			continue
 
 		}
