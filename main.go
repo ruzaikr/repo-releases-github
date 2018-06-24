@@ -33,9 +33,15 @@ func (v ByMajorMinorPatch) Less(i, j int) bool {
 	a := v[i]
 	b := v[j]
 
-	if a == nil || b == nil {
+	// invalid version strings result in nil values in the allReleases array
+	// nil is less
+	if a == nil {
 		return false
 	}
+	if b == nil {
+		return true
+	}
+
 
 	if a.Major != b.Major {
 		return a.Major > b.Major
@@ -73,7 +79,7 @@ func LatestVersions(releases []*semver.Version, minVersion *semver.Version) []*s
 	var lastVersion *semver.Version
 
 	for _, v := range releases {
-		if v == nil {
+		if v == nil { // invalid version strings result in nil values in the allReleases array. ignore them
 			continue
 		}
 
