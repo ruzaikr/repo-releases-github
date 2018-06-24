@@ -127,7 +127,15 @@ func readInputFromFile(path string) ([]Input, error) {
 		i.Owner = s1[0]
 		s2 := strings.Split(s1[1], ",")
 		i.Repo = s2[0]
-		i.MinVersion = semver.New(s2[1])
+
+		minVersionString := s2[1]
+
+		// Defend against invalid min version strings because they will cause semver to panic
+		if validVersionString(minVersionString) {
+			i.MinVersion = semver.New(minVersionString)
+		}else {
+			return nil, fmt.Errorf("minVersion %s for %s/%s is not valid", minVersionString, i.Owner, i.Repo)
+		}
 
 		repos = append(repos, i)
 	}
