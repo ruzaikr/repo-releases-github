@@ -48,6 +48,18 @@ func TestLatestVersions(t *testing.T) {
 			expectedResult: []string{"2.2.1"},
 			minVersion:     semver.New("2.2.1"),
 		},
+		// Handle abnormal case where there are no releases after the min version
+		{
+			versionSlice:   []string{"2.2.6", "2.2.2", "2.4.8"},
+			expectedResult: []string{},
+			minVersion:     semver.New("2.6.1"),
+		},
+		// Handle abnormal case where the input does not contain any versions
+		{
+			versionSlice:   []string{},
+			expectedResult: []string{},
+			minVersion:     semver.New("2.6.1"),
+		},
 		// Implement more relevant test cases here, if you can think of any
 	}
 
