@@ -17,6 +17,8 @@ import (
 // RELEASES_PER_PAGE is a constant to set the # of releases to GET per page. Higher means fewer API calls.
 const RELEASES_PER_PAGE = 100
 
+const GITHUB_RATE_LIMIT_PER_HR = 60
+
 //--- custom sorting ---
 
 type ByMajorMinorPatch []*semver.Version
@@ -153,8 +155,8 @@ func readInputFromFile(path string) ([]Input, error) {
 	// Github rate limit is 60. We cannot predict the # of API calls because there may be multiple pages of releases
 	// for each repository. However, if the number of repositories exceeds 60, we can guarantee there will be more than
 	// 60 API calls and therefore we can prevent an error
-	if len(repos) > 60 {
-		return nil, fmt.Errorf("number of repositories cannot exceed 60")
+	if len(repos) > GITHUB_RATE_LIMIT_PER_HR {
+		return nil, fmt.Errorf("number of repositories cannot exceed %d", GITHUB_RATE_LIMIT_PER_HR)
 	}
 
 	return repos, nil
