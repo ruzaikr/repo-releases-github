@@ -57,8 +57,8 @@ func (v ByMajorMinorPatch) Less(i, j int) bool {
 
 //--- end of custom sorting ---
 
-// greaterThanMin returns whether a version (first param) is greater than the min version (second param)
-func greaterThanMin(v *semver.Version, minVersion *semver.Version) bool {
+// greaterThanOrEqualMin returns whether a version (first param) is greater than the min version (second param)
+func greaterThanOrEqualMin(v *semver.Version, minVersion *semver.Version) bool {
 	if v.Major > minVersion.Major {
 		return true
 	} else if v.Major == minVersion.Major {
@@ -88,7 +88,7 @@ func LatestVersions(releases []*semver.Version, minVersion *semver.Version) []*s
 			continue
 		}
 
-		if greaterThanMin(v, minVersion) {
+		if greaterThanOrEqualMin(v, minVersion) {
 			if len(versionSlice) > 0 {
 				if v.Major == lastVersion.Major && v.Minor == lastVersion.Minor {
 					// This means that 'v' is a smaller minor version than the last one that was appended
