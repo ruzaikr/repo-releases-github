@@ -233,9 +233,13 @@ func main() {
 				versionString = versionString[1:]
 			}
 
+			// invalid version strings will be ignored else they will cause semver to panic
+			// this will cause the allReleases array to have nil values because its length is equal to the
+			// releases response. We can use a slice to solve this but an array (with nil checking in swap function)
+			// is the more efficient choice
 			if validVersionString(versionString) {
 				allReleases[i] = semver.New(versionString)
-			} // invalid version strings will be ignored else they will cause semver to panic
+			}
 
 		}
 
