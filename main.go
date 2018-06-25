@@ -174,7 +174,6 @@ func getReleasesForRepoFromGithub(client *github.Client, repoInput *Input) ([]*g
 	for loop {
 		releasesPerPage, resp, err := client.Repositories.ListReleases(ctx, repoInput.Owner, repoInput.Repo, opt)
 		if err != nil {
-			//TODO: Add retry?
 			return releases, &resp.Rate, err
 		}
 
@@ -221,7 +220,7 @@ func main() {
 
 			log.Printf("Failed to retrieve all releases for %s/%s. Details: %v.", repoInput.Owner,
 				repoInput.Repo, err)
-			// TODO: Is it better to stop here? Or move on to the next repo?
+			// We can stop here and return an error but I think it is better to move on to the next repo
 			continue
 
 		}
