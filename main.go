@@ -44,7 +44,6 @@ func (v ByMajorMinorPatch) Less(i, j int) bool {
 		return true
 	}
 
-
 	if a.Major != b.Major {
 		return a.Major > b.Major
 	}
@@ -141,7 +140,7 @@ func readInputFromFile(path string) ([]Input, error) {
 		// Defend against invalid min version strings because they will cause semver to panic
 		if validVersionString(minVersionString) {
 			i.MinVersion = semver.New(minVersionString)
-		}else {
+		} else {
 			return nil, fmt.Errorf("minVersion %s for %s/%s is not valid", minVersionString, i.Owner, i.Repo)
 		}
 
@@ -222,7 +221,6 @@ func main() {
 				repoInput.Repo, err)
 			// We can stop here and return an error but I think it is better to move on to the next repo
 			continue
-
 		}
 
 		allReleases := make([]*semver.Version, len(releases))
