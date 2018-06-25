@@ -173,7 +173,11 @@ func getReleasesForRepoFromGithub(client *github.Client, repoInput *Input) ([]*g
 	for loop {
 		releasesPerPage, resp, err := client.Repositories.ListReleases(ctx, repoInput.Owner, repoInput.Repo, opt)
 		if err != nil {
-			return releases, &resp.Rate, err
+			var rate *github.Rate
+			if resp != nil {
+				rate = &resp.Rate // to handle situation where resp may be nil and prevent nil pointer dereference
+			}
+			return releases, rate, err
 		}
 
 		releases = append(releases, releasesPerPage...)
