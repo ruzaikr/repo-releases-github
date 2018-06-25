@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/coreos/go-semver/semver"
+	"github.com/stretchr/testify/assert"
 )
 
 func stringToVersionSlice(stringSlice []string) []*semver.Version {
@@ -75,5 +76,30 @@ func TestLatestVersions(t *testing.T) {
 
 	for _, testValues := range testCases {
 		test(testValues.versionSlice, testValues.expectedResult, testValues.minVersion)
+	}
+}
+
+type VersionStringWithValidity struct {
+	VersionString string
+	ExpectedValidity bool
+}
+
+func TestValidVersionString(t *testing.T)  {
+	vStrings := []VersionStringWithValidity{
+		{"1.2.1", true},
+		{"12.4.2", true},
+		{"6.33.2", true},
+		{"1.2.1-alpha.1", true},
+		{"1.2.3-alpha.10.beta.0+build.unicorn.rainbow", true},
+		{"0.2.1", true},
+		{"hello", false},
+		{"0.23.12.3", false},
+		{"", false},
+		{"v1.3.1", false},
+	}
+
+	for _, vs := range vStrings {
+		assert.Equal(t, vs.ExpectedValidity, validVersionString(vs.VersionString),
+			"Tested version string: %s", vs.VersionString)
 	}
 }
